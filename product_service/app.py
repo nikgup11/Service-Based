@@ -37,7 +37,6 @@ def get_products():
 @app.route("/reduce_stock", methods=["POST"])
 def reduce_stock():
     seed_products_if_needed()
-
     data = request.get_json()
     sku = data.get("sku")
 
@@ -53,6 +52,7 @@ def reduce_stock():
             "success": True,
             "product_name": db.hget(sku, "name"),
             "new_stock": new_stock,
+            "price": db.hget(sku, "price")  # <--- MUST RETURN PRICE HERE
         })
     else:
         return jsonify({"success": False, "message": "Out of Stock"}), 400
