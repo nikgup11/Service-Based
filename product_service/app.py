@@ -10,9 +10,10 @@ db = Redis(host="shop_db", port=6379, decode_responses=True)
 
 def seed_products_if_needed():
     if db.exists("sku:001") == 0:
-        db.hset("sku:001", mapping={"name": "iPhone 15 Pro", "stock": 10})
-        db.hset("sku:002", mapping={"name": "MacBook Air", "stock": 5})
-        db.hset("sku:003", mapping={"name": "Sony PS5", "stock": 20})
+        # Added 'price' field to mapping
+        db.hset("sku:001", mapping={"name": "iPhone 15 Pro", "stock": 10, "price": 999})
+        db.hset("sku:002", mapping={"name": "MacBook Air", "stock": 5, "price": 1200})
+        db.hset("sku:003", mapping={"name": "Sony PS5", "stock": 20, "price": 500})
 
 
 @app.route("/")
