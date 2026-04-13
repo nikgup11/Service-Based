@@ -80,14 +80,14 @@ def index():
 def submit_order():
     sku = request.form["sku"]
     try:
-        # 1. Call Product Service to reduce stock and get price
+        # Call Product Service to reduce stock and get price
         prod_resp = requests.post("http://product-app:5000/reduce_stock", json={"sku": sku})
         prod_data = prod_resp.json()
 
         if prod_resp.status_code == 200 and prod_data["success"]:
             price = int(prod_data.get("price", 0))
 
-            # 2. Call Money Service to deduct funds
+            # Call Money Service to deduct funds
             money_resp = requests.post("http://money-app:5000/deduct", json={"amount": price})
             money_data = money_resp.json()
 
