@@ -9,7 +9,7 @@ db = Redis(host="shop_db", port=6379, decode_responses=True)
 def get_balance():
     # Initialize balance to 2000 if it doesn't exist
     if not db.exists("user_balance"):
-        db.set("user_balance", 2000)
+        db.set("user_balance", 10000)
     
     return jsonify({
         "service": "Money Service",
