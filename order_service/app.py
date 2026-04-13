@@ -71,23 +71,31 @@ def index():
 @app.route("/submit", methods=["POST"])
 def submit_order():
     sku = request.form["sku"]
-
     try:
-        response = requests.post("http://product_app:5000/reduce_stock", json={"sku": sku})
-        data = response.json()
+        # 1. Reduce Stock and get Product Info (including price)
+        prod_resp = requests.post("http://product-app:5000/reduce_stock", json={"sku": sku})
+        prod_data = prod_resp.json()
 
-        if response.status_code == 200 and data["success"]:
-            order_id = db.incr("order_id_counter")
-            log_message = f"Order #{order_id}: {data['product_name']} (Stock left: {data['new_stock']})"
-            db.lpush("order_history", log_message)
-            return f"<h2>Order Successful!</h2><p>{log_message}</p><a href='/order/'>Back</a>"
-        else:
-            reason = data.get("message", "Unknown Error")
-            return f"<h2>Order Failed</h2><p>Reason: {reason}</p><a href='/order/'>Back</a>"
+        if prod_resp.status_code == 200 and prod_data["success"]:
+            # 2. Get price (ensure product_service returns it in /reduce_stock)
+            price = int(prod_data.get("price", 0)) 
+
+            # 3. Deduct Money
+            money_resp = requests.post("http://money-app:5000/deduct", json={"amount": price})
+            money_data = money_resp.json()
+
+            if money_resp.status_code == 200:
+                order_id = db.incr("order_id_counter")
+                log_message = f"Order #{order_id}: {prod_data['product_name']} - Paid ${price}"
+                db.lpush("order_history", log_message)
+                return f"<h2>Success!</h2><p>{log_message}</p><a href='/order/'>Back</a>"
+            else:
+                return f"<h2>Payment Failed</h2><p>{money_data['message']}</p>"
+        
+        return f"<h2>Order Failed</h2><p>{prod_data.get('message')}</p>"
 
     except Exception as e:
-        return f"<h2>System Error</h2><p>Could not connect to Product Service.<br/>Error: {str(e)}</p><a href='/order/'>Back</a>"
-
+        return f"<h2>System Error</h2><p>{str(e)}</p>"
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
