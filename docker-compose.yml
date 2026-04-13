@@ -16,6 +16,13 @@ services:
       - shop_db
     environment:
       - FLASK_ENV=development
+  
+  money-app:
+      build: ./money_service
+      expose:
+        - "5000"
+      depends_on:
+        - shop_db
 
   shop_db:
     image: "redis:alpine"
