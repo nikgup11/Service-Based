@@ -1,5 +1,5 @@
 services:
-  product_app:
+  product-app:
     build: ./product_service
     expose:
       - "5000"
@@ -8,7 +8,7 @@ services:
     environment:
       - FLASK_ENV=development
 
-  order_app:
+  order-app:
     build: ./order_service
     expose:
       - "5000"
